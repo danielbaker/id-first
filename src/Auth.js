@@ -1,12 +1,7 @@
 import auth0 from "auth0-js";
 
 export default class Auth {
-  auth0 = new auth0.WebAuth({
-    domain: window.config.auth0Domain,
-    clientID: window.config.clientID,
-    redirectUri: window.config.callbackURL,
-    responseType: "token id_token"
-  });
+  auth0 = new auth0.WebAuth(window.config);
 
   loginPasswordless(mobile, code, errorCB) {
     this.auth0.passwordlessVerify(
