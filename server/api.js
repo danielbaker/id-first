@@ -1,9 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request-promise-native");
+const moment = require("moment");
+const AuthenticationClient = require("auth0").AuthenticationClient;
 
 const app = express();
-const port = process.env.PORT || 5000;
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -17,9 +19,28 @@ app.use(function(req, res, next) {
   next();
 });
 
-const domain = "picklerick.au.auth0.com";
+// Ensure mgmtAccessToken is available and up to date
+app.use(function(req, res, next) {
+  let mgmtAccess = req.app.locals.mgmtAccess;
+  if (mgmtAccess && moment().isBefore(mgmtAccess.expiry)) {
+    next();
+  }
 
-const AuthenticationClient = require("auth0").AuthenticationClient;
+  updateMgmtAccessToken((err, resp) => {
+    if (err) {
+      res.status(500).send(err);
+      return;
+    }
+
+    req.app.locals.mgmtAccess = {
+      token: resp.access_token,
+      expiry: moment().add(resp.expires_in - 30, "seconds")
+    };
+    next();
+  });
+});
+
+const domain = "picklerick.au.auth0.com";
 const auth0 = new AuthenticationClient({
   domain: domain,
   clientId: "FKMA3bQarN9HoxQaCaEixwd4WPBzFKHZ",
@@ -27,31 +48,17 @@ const auth0 = new AuthenticationClient({
     "zgXMuMHbGfmg8QzLSP8wBDCMWjX_ULGH9jHJ4rHCzNWI7nnFbr84Lc5Qyors9rNa"
 });
 
-let mgmtAccessToken = "NOT_SET";
-
 // updateMgmtAccessToken calls the Auth0 authentication API
 // to retrieve a new Management API access token.
 // It should be called periodically to prevent token expiry errors.
-const updateMgmtAccessToken = () => {
+const updateMgmtAccessToken = cb => {
   auth0.clientCredentialsGrant(
     {
-      audience: "https://picklerick.au.auth0.com/api/v2/",
-      scope: "read:users"
+      audience: "https://picklerick.au.auth0.com/api/v2/"
     },
-    function(err, response) {
-      if (err) {
-        console.log(err, response);
-      }
-      mgmtAccessToken = response.access_token;
-    }
+    cb
   );
 };
-
-// Get the Management API Access token for the first time.
-updateMgmtAccessToken();
-
-// Update the Management API Access token every 5 minutes
-setInterval(updateMgmtAccessToken, 5 * 60 * 1000);
 
 const findUserByEmail = email => {
   let options = {
@@ -59,7 +66,7 @@ const findUserByEmail = email => {
     json: true,
     url: `https://${domain}/api/v2/users`,
     qs: { q: `email:"${email}"`, search_engine: "v3" },
-    headers: { authorization: `Bearer ${mgmtAccessToken}` }
+    headers: { authorization: `Bearer ${app.locals.mgmtAccess.token}` }
   };
 
   return request(options);
@@ -71,7 +78,7 @@ const findUserByUsername = username => {
     json: true,
     url: `https://${domain}/api/v2/users`,
     qs: { q: `username:"${username}"`, search_engine: "v3" },
-    headers: { authorization: `Bearer ${mgmtAccessToken}` }
+    headers: { authorization: `Bearer ${app.locals.mgmtAccess.token}` }
   };
 
   return request(options);
@@ -86,7 +93,7 @@ const findUserByMobile = mobile => {
       q: `identities.profileData.phone_number:"${mobile}"`,
       search_engine: "v3"
     },
-    headers: { authorization: `Bearer ${mgmtAccessToken}` }
+    headers: { authorization: `Bearer ${app.locals.mgmtAccess.token}` }
   };
 
   return request(options);
@@ -97,7 +104,7 @@ const getFederatedIdentityConnection = (email, clientID) => {
     method: "GET",
     json: true,
     url: `https://${domain}/api/v2/connections`,
-    headers: { authorization: `Bearer ${mgmtAccessToken}` }
+    headers: { authorization: `Bearer ${app.locals.mgmtAccess.token}` }
   };
 
   const emailDomain = email.replace(/.*@/, "");
@@ -127,8 +134,8 @@ app.post("/api/identifier", (req, res) => {
   // Check if the user entered an email address
   if (emailRegex.test(req.body.userID)) {
     // check if the email belongs to an enterprise connection
-    getFederatedIdentityConnection(req.body.userID, req.body.clientID).then(
-      conn => {
+    getFederatedIdentityConnection(req.body.userID, req.body.clientID)
+      .then(conn => {
         if (conn) {
           res.json({
             enterpriseConnection: conn.name
@@ -151,8 +158,10 @@ app.post("/api/identifier", (req, res) => {
               res.status(500).send(error);
             });
         }
-      }
-    );
+      })
+      .catch(error => {
+        res.status(500).send(error);
+      });
   } else if (mobileRegex.test(req.body.userID)) {
     // User entered a mobile number
     findUserByMobile(req.body.userID)
@@ -196,4 +205,8 @@ app.post("/api/identifier", (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+module.exports = app;
+
+// UNCOMMENT for local dev
+// const port = process.env.PORT || 5000;
+// app.listen(port, () => console.log(`Listening on port ${port}`));

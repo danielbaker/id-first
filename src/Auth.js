@@ -27,7 +27,8 @@ export default class Auth {
     this.auth0.login(
       {
         username: user,
-        password: password
+        password: password,
+        connection: window.config.connection
       },
       function(err, res) {
         if (err) {
