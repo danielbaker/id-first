@@ -16,7 +16,8 @@ class App extends Component {
     password: "",
     showOTPEntry: false,
     showPasswordEntry: false,
-    submitDisabled: false
+    submitDisabled: false,
+    dbConnectionName: ""
   };
 
   onIdUpdated = e => {
@@ -61,10 +62,11 @@ class App extends Component {
         submitDisabled: false,
         showOTPEntry: true
       });
-    } else if (response.askPassword) {
+    } else if (response.askPassword && response.connection) {
       this.setState({
         submitDisabled: false,
-        showPasswordEntry: true
+        showPasswordEntry: true,
+        dbConnectionName: response.connection
       });
     } else if (response.enterpriseConnection) {
       this.auth.loginEnterprise(
@@ -88,8 +90,11 @@ class App extends Component {
     this.setState({
       submitDisabled: true
     });
-    this.auth.loginPassword(this.state.userID, this.state.password, err =>
-      console.log(err)
+    this.auth.loginPassword(
+      this.state.dbConnectionName,
+      this.state.userID,
+      this.state.password,
+      err => console.log(err)
     );
   };
 

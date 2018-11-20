@@ -143,15 +143,28 @@ app.post("/api/identifier", (req, res) => {
         } else {
           // not an enterprise connection, see if the user exists
           findUserByEmail(req.body.userID)
-            .then(body => {
-              if (body.length === 0) {
+            .then(users => {
+              if (users.length === 0) {
                 res.json({
                   mustSignup: true
                 });
               } else {
-                res.json({
-                  askPassword: true
-                });
+                // find the first db connection in the list of identities within the list of users
+                const dbConns = users
+                  .map(user => user.identities)
+                  .reduce((res, val) => res.concat(val)) // the equivalent of calling flat(1)
+                  .filter(identity => identity.provider === "auth0");
+                if (dbConns.length === 0) {
+                  // The user might have signed up via social media?
+                  res.json({
+                    mustSignup: true
+                  });
+                } else {
+                  res.json({
+                    askPassword: true,
+                    connection: dbConns[0].connection
+                  });
+                }
               }
             })
             .catch(error => {

@@ -23,17 +23,12 @@ export default class Auth {
     );
   }
 
-  loginPassword(user, password, errorCB) {
-    console.log({
-      username: user,
-      password: password,
-      realm: window.config.connection
-    });
+  loginPassword(realm, user, password, errorCB) {
     this.auth0.login(
       {
         username: user,
         password: password,
-        realm: window.config.connection
+        realm: realm
       },
       function(err, res) {
         if (err) {

@@ -36,7 +36,9 @@
     "build": "yarn run build:react && yarn run build:bundle",
     "build:react": "react-scripts build",
     "build:bundle": "webpack --config single-client-bundle-webpack.config.js",
-    "precommit": "pretty-quick --staged"
+    "precommit": "pretty-quick --staged",
+    "wt:create": "wt create --meta wt-compiler=webtask-tools/express -n id-first server/api.js",
+    "wt:update": "wt update -b id-first server/api.js"
   },
   "proxy": "http://picklerick:5000/",
   "eslintConfig": {
