@@ -41,7 +41,7 @@ class App extends Component {
     this.setState({
       submitDisabled: true
     });
-    fetch("/api/identifier", {
+    fetch(`${window.serverURL || ""}/api/identifier`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json; charset=utf-8"
