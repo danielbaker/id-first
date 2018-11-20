@@ -28,7 +28,7 @@ export default class Auth {
       {
         username: user,
         password: password,
-        realm: window.config.connection
+        connection: window.config.connection
       },
       function(err, res) {
         if (err) {
