@@ -47,7 +47,7 @@ export default class Auth {
     this.auth0.login(
       {
         login_hint: email,
-        connection: connection
+        realm: connection
       },
       function(err, res) {
         if (err) {
