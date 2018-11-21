@@ -6,9 +6,11 @@ export default class Auth {
     clientID: window.config.clientID,
     redirectUri: window.config.callbackURL,
     responseType: window.config.extraParams.response_type,
+    scope: window.config.extraParams.scope,
     state: window.config.extraParams.state,
     nonce: window.config.extraParams.nonce,
-    _csrf: window.config.extraParams._csrf
+    _csrf: window.config.extraParams._csrf,
+    audience: window.config.extraParams.audience
   });
 
   loginPasswordless(mobile, code, errorCB) {
@@ -44,10 +46,10 @@ export default class Auth {
   }
 
   loginEnterprise(email, connection, errorCB) {
-    this.auth0.login(
+    this.auth0.authorize(
       {
         login_hint: email,
-        realm: connection
+        connection: connection
       },
       function(err, res) {
         if (err) {
