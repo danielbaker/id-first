@@ -77,6 +77,7 @@ export default class Auth {
         connection: connection
       })
     );
+    return;
     this.auth0.authorize(
       {
         connection: connection
