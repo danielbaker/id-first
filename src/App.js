@@ -171,7 +171,7 @@ class App extends Component {
                   Next
                 </Button>
                 <FormGroup>
-                  <SocialButtons />
+                  <SocialButtons auth={this.auth} />
                 </FormGroup>
               </div>
             )}

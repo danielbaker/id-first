@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Auth from "./Auth";
 import "./SocialButtons.css";
 
 // SocialButtons determines which social providers
@@ -34,14 +33,13 @@ export default class SocialButtons extends Component {
   };
 
   login = connection => {
-    new Auth().loginSocial(connection, err => {
+    this.props.auth.loginSocial(connection, err => {
       console.log(err);
       alert(err);
     });
   };
 
   render() {
-    console.log(this.state.config.strategies.filter(s => STRATEGIES[s.name]));
     return (
       <div className="social-providers">
         {this.state.config.strategies
