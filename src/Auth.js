@@ -62,6 +62,7 @@ export default class Auth {
   }
 
   loginSocial(connection, errorCB) {
+    console.log(connection);
     this.auth0.authorize(
       {
         connection: connection
