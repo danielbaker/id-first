@@ -60,4 +60,19 @@ export default class Auth {
       }
     );
   }
+
+  loginSocial(connection, errorCB) {
+    this.auth0.authorize(
+      {
+        connection: connection
+      },
+      function(err, res) {
+        if (err) {
+          errorCB(err);
+        } else {
+          console.log(res);
+        }
+      }
+    );
+  }
 }

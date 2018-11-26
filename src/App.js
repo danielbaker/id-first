@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 import { Button, Form, FormGroup, Label, Input, FormText } from "reactstrap";
 import Auth from "./Auth";
+import SocialButtons from "./SocialButtons";
 
 class App extends Component {
   constructor() {
@@ -169,6 +170,9 @@ class App extends Component {
                 >
                   Next
                 </Button>
+                <FormGroup>
+                  <SocialButtons />
+                </FormGroup>
               </div>
             )}
           </Form>
