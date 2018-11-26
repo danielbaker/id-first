@@ -62,6 +62,7 @@ export default class Auth {
   }
 
   loginSocial(connection, errorCB) {
+    console.log(this.auth0);
     console.log(
       this.auth0.buildAuthorizeUrl({
         domain: window.config.auth0Domain,
