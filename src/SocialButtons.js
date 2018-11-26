@@ -32,7 +32,8 @@ export default class SocialButtons extends Component {
     }
   };
 
-  login = connection => {
+  login = (connection, e) => {
+    e.preventDefault();
     this.props.auth.loginSocial(connection, err => {
       console.log(err);
       alert(err);

@@ -62,22 +62,6 @@ export default class Auth {
   }
 
   loginSocial(connection, errorCB) {
-    console.log(this.auth0);
-    console.log(
-      this.auth0.buildAuthorizeUrl({
-        domain: window.config.auth0Domain,
-        clientID: window.config.clientID,
-        redirectUri: window.config.callbackURL,
-        responseType: window.config.extraParams.response_type,
-        scope: window.config.extraParams.scope,
-        state: window.config.extraParams.state,
-        nonce: window.config.extraParams.nonce,
-        _csrf: window.config.extraParams._csrf,
-        audience: window.config.extraParams.audience,
-        connection: connection
-      })
-    );
-    return;
     this.auth0.authorize(
       {
         connection: connection
